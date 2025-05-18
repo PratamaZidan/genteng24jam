@@ -1,0 +1,55 @@
+{
+  "name": "Genteng 24 Jam",
+  "short_name": "Gtg 24 Jam",
+  "description": "Aplikasi berbagi berita terkini dengan map dan notifikasi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ad2323",
+  "icons": [
+    {
+      "src": "images/icons/genteng_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icons/genteng_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Tambah Berita",
+      "short_name": "Tambah",
+      "description": "Membuat berita baru",
+      "url": "/#/add",
+      "icons": [
+        {
+          "src": "images/icons/genteng_512x512.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  
+  "screenshots": [
+    {
+      "src": "/images/screenshots/Dekstop.png",
+      "sizes": "1440x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tampilan Desktop Aplikasi"
+    },
+    {
+      "src": "/images/screenshots/Mobile.png",
+      "sizes": "375x667",
+      "type": "image/png", 
+      "form_factor": "narrow",
+      "label": "Tampilan Mobile"
+    }
+  ]
+}
