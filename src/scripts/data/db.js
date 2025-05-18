@@ -5,11 +5,11 @@ const DATABASE_VERSION = 1;
 const OBJECT_STORE_NAME = 'saved-reports';
  
 const dbPromise = openDB(DATABASE_NAME, DATABASE_VERSION, {
-  upgrade: (db) => {
-    if (!db.objectStoreNames.contains(OBJECT_STORE_NAME)) {
-      db.createObjectStore(OBJECT_STORE_NAME, {keyPath: 'id'});
-    }
-  },
+    upgrade: (database)=>{
+        database.createObjectStore(OBJECT_STORE_NAME, {
+            keyPath: 'id'
+        });
+    },
 });
 
 export const saveStory = async (story) => {

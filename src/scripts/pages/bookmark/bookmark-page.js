@@ -20,10 +20,13 @@ class BookmarkPage {
   }
 
   async showSavedStories() {
-    this.showLoading();
     try {
+      this.showLoading();
       const savedStories = await getSavedStories();
-      this.renderSavedStories(savedStories);
+      setTimeout(()=>{
+            this.hideLoading()
+            this.renderSavedStories(savedStories);
+        }, 1000)
     } catch (error) {
       console.error("Error loading saved news:", error);
       const container = document.getElementById("saved-story-list");
@@ -31,58 +34,54 @@ class BookmarkPage {
         container.innerHTML = `
           <p class="error-message">Gagal memuat berita tersimpan</p>
         `;
-      }
-    } finally {
-      this.hideLoading();
+      } 
     }
   }
 
-  renderSavedStories(stories) {
-    const container = document.getElementById("saved-story-list");
+ renderSavedStories(stories) {
+  const container = document.getElementById("saved-story-list");
 
-    if (!container) {
-      console.error("Container element not found");
-      return;
-    }
+  if (!container) {
+    console.error("Container element not found");
+    return;
+  }
 
-    if (stories.length === 0) {
-      container.innerHTML =
-        '<p style="text-align:center;">Belum ada berita yang disimpan.</p>';
-      return;
-    }
+  if (stories.length === 0) {
+    container.innerHTML =
+      '<p style="text-align:center;">Belum ada berita yang disimpan.</p>';
+    return;
+  }
 
-    container.innerHTML = stories
-      .map(
-        (story) => `
-        <div class="story" data-id="${story.id}" data-lat="${
-          story.lat || ""
-        }" data-lon="${story.lon || ""}">
-            <img src="${story.photoUrl}" alt="${story.description}">
-            <p>${story.name}</p>
+  container.classList.add("card-grid"); // tambahkan class grid jika belum
+
+  container.innerHTML = stories
+    .map(
+      (story) => `
+        <div class="card story" data-id="${story.id}" data-lat="${story.lat || ""}" data-lon="${story.lon || ""}">
+          <img src="${story.photoUrl}" alt="${story.description || story.name}" class="card-image">
+          <div class="card-content">
+            <h3>${story.name}</h3>
             <p>${story.description}</p>
             ${
               story.lat && story.lon
-                ? `
-            <small class="location">
-                <i class="fas fa-map-marker-alt"></i> Lokasi
-                ${story.lat.toFixed(4)}, ${story.lon.toFixed(4)}
-            </small>
-            `
+                ? `<small class="location">
+                    <i class="fas fa-map-marker-alt"></i> Lokasi: ${story.lat.toFixed(4)}, ${story.lon.toFixed(4)}
+                   </small>`
                 : ""
             }
-            <small>Dibuat Pada: ${new Date(story.createdAt).toLocaleString(
-              "id-ID",
-            )}</small>
-          <button class="delete-btn" aria-label="Hapus Berita">
-            <i class="material-icons">Hapus</i>
-          </button>
+            <small>Dibuat Pada: ${new Date(story.createdAt).toLocaleString("id-ID")}</small>
+            <button class="delete-btn red-btn" aria-label="Hapus Berita">
+              <i class="fas fa-trash-alt"></i> Hapus Berita
+            </button>
+          </div>
         </div>
-      `,
-      )
-      .join("");
+      `
+    )
+    .join("");
 
-    this.setupDeleteButtons();
-  }
+  this.setupDeleteButtons();
+}
+
 
   setupDeleteButtons() {
     document.querySelectorAll(".delete-btn").forEach((button) => {

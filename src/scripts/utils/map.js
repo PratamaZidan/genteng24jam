@@ -16,8 +16,21 @@ export default class Map {
   #zoom = 5;
   #map = null;
 
-  getMap() {
-    return this.#map;
+  constructor(selector, options = {}) {
+    this.#zoom = options.zoom ?? this.#zoom;
+
+    const tileOsm = tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+    });
+
+    this.#map = map(document.querySelector(selector), {
+      zoom: this.#zoom,
+      scrollWheelZoom: false,
+      layers: [tileOsm],
+      ...options,
+    });
+
+    this._markers = [];
   }
 
   static async getPlaceNameByCoordinate(latitude, longitude) {
@@ -29,7 +42,7 @@ export default class Map {
       const response = await fetch(url);
       const json = await response.json();
       const place = json.features[0].place_name.split(', ');
-      return [place.at(-2), place.at(-1)].map((name) => name).join(', ');
+      return [place.at(-2), place.at(-1)].join(', ');
     } catch (error) {
       console.error('getPlaceNameByCoordinate: error:', error);
       return `${latitude}, ${longitude}`;
@@ -52,63 +65,36 @@ export default class Map {
   }
 
   static async build(selector, options = {}) {
-    if ('center' in options && options.center) {
-      return new Map(selector, options);
-    }
-
     const jakartaCoordinate = [-6.2, 106.816666];
 
     if ('locate' in options && options.locate) {
       try {
         const position = await Map.getCurrentPosition();
         const coordinate = [position.coords.latitude, position.coords.longitude];
-
-        return new Map(selector, {
-          ...options,
-          center: coordinate,
-        });
+        return new Map(selector, { ...options, center: coordinate });
       } catch (error) {
         console.error('build: error:', error);
-
-        return new Map(selector, {
-          ...options,
-          center: jakartaCoordinate,
-        });
+        return new Map(selector, { ...options, center: jakartaCoordinate });
       }
     }
 
-    return new Map(selector, {
-      ...options,
-      center: jakartaCoordinate,
-    });
-  }
-
-  constructor(selector, options = {}) {
-    this.#zoom = options.zoom ?? this.#zoom;
-
-    const tileOsm = tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
-    });
-
-    this.#map = map(document.querySelector(selector), {
-      zoom: this.#zoom,
-      scrollWheelZoom: false,
-      layers: [tileOsm],
-      ...options,
-    });
+    return new Map(selector, { ...options, center: jakartaCoordinate });
   }
 
   get leafletInstance() {
     return this.#map;
   }
 
+  getMap() {
+    return this.#map;
+  }
+
   changeCamera(coordinate, zoomLevel = null) {
     if (!zoomLevel) {
       this.#map.setView(latLng(coordinate), this.#zoom);
-      return;
+    } else {
+      this.#map.setView(latLng(coordinate), zoomLevel);
     }
-
-    this.#map.setView(latLng(coordinate), zoomLevel);
   }
 
   getCenter() {
@@ -134,7 +120,7 @@ export default class Map {
 
   addMarker(coordinates, markerOptions = {}, popupOptions = null) {
     if (typeof markerOptions !== 'object') {
-      throw new Error("markerOptons must be an object");
+      throw new Error("markerOptions must be an object");
     }
 
     const newMarker = marker(coordinates, {
@@ -146,9 +132,8 @@ export default class Map {
       if (typeof popupOptions !== 'object') {
         throw new Error("popupOptions must be an object");
       }
-
       if (!('content' in popupOptions)) {
-        throw new Error("popupOptions must be include `content` property.");
+        throw new Error("popupOptions must include `content` property.");
       }
 
       const newPopup = popup(coordinates, popupOptions);
@@ -156,7 +141,35 @@ export default class Map {
     }
 
     newMarker.addTo(this.#map);
-
     return newMarker;
+  }
+
+  addMarkers(stories = []) {
+    if (!Array.isArray(stories)) {
+      throw new Error("Parameter stories harus berupa array");
+    }
+
+    this._markers = [];
+
+    stories.forEach((story) => {
+      if (story.lat && story.lon) {
+        const coordinates = [story.lat, story.lon];
+        const markerOptions = { alt: story.name };
+        const popupOptions = {
+          content: `<b>${story.name}</b><br>${story.description}`,
+        };
+
+        const newMarker = this.addMarker(coordinates, markerOptions, popupOptions);
+        this._markers.push(newMarker);
+      }
+    });
+  }
+
+  get markers() {
+    return this._markers || [];
+  }
+
+  set markers(val) {
+    this._markers = val;
   }
 }

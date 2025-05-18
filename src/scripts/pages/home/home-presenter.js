@@ -16,7 +16,7 @@ export default class HomePresenter {
       }
 
       const { listStory, error } = await getStories(token, true);
-
+      
       if (error) throw new Error(error.message || "Gagal memuat cerita");
 
       this._view.renderStories(listStory);

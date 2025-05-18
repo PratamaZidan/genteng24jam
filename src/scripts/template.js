@@ -1,11 +1,15 @@
   export function generateAuthenticatedNavigationListTemplate() {
   return `
     <li>
+          <a href="#/" id="home-button">
+            <i class="fas fa-home"></i> Lihat Berita
+          </a>
+    <li>
         <a href="#/save-story" id="home-button">
           <i class="fas fa-bookmark"></i> Berita Tersimpan
         </a>
     </li>
-    <li id="push-notification-tools"></li>
+    <li id="push-notification-tools" class="push-notification-tools"></li>
     <li>
       <a href='#/add' id='add-button'>
         <i class='fas fa-plus-circle'></i> Tambah Berita

@@ -37,7 +37,9 @@ export default class HomePage {
     await this.initialMap();
     const presenter = new HomePresenter(this);
     await presenter.showStories();
-
+    
+  this.setupSaveButtons();
+  await this.updateSavedStates();
   }
 
   async initialMap() {
@@ -111,19 +113,30 @@ export default class HomePage {
 
       const isCurrentlySaved = await checkIfStorySaved(storyId);
       if (isCurrentlySaved) {
-        alert("Cerita ini sudah disimpan sebelumnya");
+        alert("Berita ini sudah disimpan sebelumnya");
         return;
       }
 
       await saveStory(story);
-      alert("Cerita berhasil disimpan!");
+      alert("Berita berhasil disimpan!");
     } catch (error) {
-      console.error("Gagal menyimpan cerita:", error);
-      alert("Gagal menyimpan cerita");
+      console.error("Gagal menyimpan Berita:", error);
+      alert("Gagal menyimpan Berita");
     } finally {
       button.disabled = false;
     }
   }
+
+  async updateSavedStates() {
+  const buttons = document.querySelectorAll(".save-btn");
+  for (const button of buttons) {
+    const id = button.dataset.id;
+    if (await checkIfStorySaved(id)) {
+      button.innerHTML = '<i class="fas fa-check"></i> Disimpan';
+      button.disabled = true;
+    }
+  }
+}
 
   addNewsMarkers(stories) {
     this.Map.addMarkers(stories);
@@ -149,4 +162,9 @@ export default class HomePage {
   hideLoading() {
     document.getElementById("loading").style.display = "none";
   }
+
+  showError(message) {
+  const container = document.getElementById('story-list');
+  container.innerHTML = `<p class="error-message">${message}</p>`;
+}
 }

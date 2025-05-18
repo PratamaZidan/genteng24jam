@@ -1,5 +1,5 @@
 import { getAccessToken } from '../utils/auth';
-import { BASE_URL } from '../config';
+import { ACCESS_TOKEN_KEY, BASE_URL } from '../config';
 
 const ENDPOINTS = {
   LOGIN: `${BASE_URL}/login`,
@@ -128,59 +128,50 @@ export async function addStory(formData, token) {
 }
 
 // SUBSCRIBE PUSH NOTIFICATION
-export async function subscribePushNotification(subscription, token) {
-  const subscriptionJson = subscription.toJSON();
+export async function subscribePushNotification({endpoint, keys:{p256dh, auth}}) {
+  const accessToken = localStorage.getItem('token')
+  const data = JSON.stringify({
+    endpoint,
+    keys: {p256dh, auth}
+  })
 
-  const payload = {
-    endpoint: subscriptionJson.endpoint,
-    keys: {
-      p256dh: subscriptionJson.keys.p256dh,
-      auth: subscriptionJson.keys.auth,
+  const fetchResponse = await fetch(ENDPOINTS.SUBSCRIBE, {
+    method: 'POST',
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`,
     },
-  };
+    body: data
+  })
 
-  const response = await fetch(ENDPOINTS.SUBSCRIBE, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const json = await fetchResponse.json()
 
-  return response.json();
+  return{
+    ...json,
+    ok: fetchResponse.ok
+  }
 }
 
+
 // UNSUBSCRIBE PUSH NOTIFICATION
-export async function unsubscribePushNotification(endpoint, token) {
-  try {
-    const response = await fetch(ENDPOINTS.SUBSCRIBE, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ endpoint }),
-    });
+export async function unsubscribePushNotification({endpoint}) {
+  const accessToken = localStorage.getItem('token')
+  const data = JSON.stringify({endpoint})
 
-    const data = await response.json();
+  const fetchResponse = await fetch(ENDPOINTS.UNSUBSCRIBE, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`,
+    },
+    body: data
+  })
 
-    if (!response.ok) {
-      return {
-        error: true,
-        message: data.message || "Gagal melakukan unsubscribe",
-      };
-    }
+  const json = fetchResponse.json()
 
-    return {
-      error: false,
-      data: data.data,
-    };
-  } catch (error) {
-    return {
-      error: true,
-      message: error.message || "Terjadi kesalahan jaringan",
-    };
+  return {
+    ...json,
+    ok: fetchResponse.ok
   }
 }
 
