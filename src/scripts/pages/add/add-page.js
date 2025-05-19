@@ -24,7 +24,7 @@ export default class AddPage {
           <div id='camera-container' class='camera-container'>
             <video id='camera-preview'  autoplay playsinline style='display:none; width:100%; max-width:400px;'></video>
             <canvas id='photo-canvas' style='display:none;'></canvas>
-            <div class='camera-tools'  style='display:none;!important display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 30px;'>
+            <div class='camera-tools' style='display: none; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 30px;'>
               <select id='camera-select'></select>
               <button type='button' id='take-photo'>Ambil Gambar</button>
             </div>

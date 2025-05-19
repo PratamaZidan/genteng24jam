@@ -1,2 +1,2 @@
-APP_URL=<url_aplikasi>
-MAP_SERVICE_API_KEY=<api_key>
+APP_URL= https://grand-begonia-99a498.netlify.app/
+MAP_SERVICE_API_KEY= lCmymQ3CwjShy6lI55Hl

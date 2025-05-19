@@ -6,7 +6,6 @@ import {
   StaleWhileRevalidate,
 } from "workbox-strategies";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
-import { BASE_URL } from './config';
 
 precacheAndRoute(self.__WB_MANIFEST);
 
@@ -61,38 +60,19 @@ registerRoute(
   }),
 );
 
-self.addEventListener("push", (event) => {
+self.addEventListener('push', function(event) {
   let data = {};
-
-  if (event.data) {
-    try {
-      data = event.data.json();
-    } catch (e) {
-      data = {
-        title: "Notifikasi",
-        options: {
-          body: event.data.text(),
-        },
-      };
-    }
+  try {
+    data = event.data.json(); 
+  } catch (e) {
+    data = { title: event.data.text() }; 
   }
 
-  const title = data.title || "Berita berhasil dibuat";
+  const title = data.title || 'Notifikasi Baru';
   const options = {
-    body: data.options?.body || "Anda telah membuat berita baru.",
+    body: data.body || 'Ada pesan masuk',
+    
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
-});
-
-const cacheName = 'calculator-cache-v1';
-const precachedResources = ['/', '/app.js', '/styles.css'];
- 
-async function precache() {
-  const cache = await caches.open(cacheName);
-  return cache.addAll(precachedResources);
-}
- 
-self.addEventListener('install', (event) => {
-  event.waitUntil(precache());
 });

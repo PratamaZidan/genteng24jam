@@ -84,7 +84,6 @@ export async function subscribe() {
       console.error("subscribe: response:", response);
       alert(failureSubscribeMessage);
 
-      // Undo subscribe to push notification
       await pushSubscription.unsubscribe();
 
       return;
@@ -96,7 +95,6 @@ export async function subscribe() {
     console.error("subscribe: error:", error);
     alert(failureSubscribeMessage);
 
-    // Undo subscribe to push notification
     await pushSubscription.unsubscribe();
   }
 }

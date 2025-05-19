@@ -80,27 +80,52 @@ export default class AddPresenter {
   }
 
   async takePhoto() {
-    if (this.camera) {
-      try {
-        const imageBase64 = await this.camera.takePicture();
-        this._view.showPhotoResult(imageBase64);
+  if (this.camera) {
+    try {
+      const image = await this.camera.takePicture();
 
-        this.photoBlob = await this.convertBase64ToBlob(imageBase64, 'image/png');
-        return;
-      } catch (error) {
-        console.error('Error taking photo with Camera class:', error);
+      if (image instanceof Blob) {
+        const dataUrl = await this.blobToDataURL(image);
+        this._view.showPhotoResult(dataUrl);
+        this.photoBlob = image;
       }
+
+      else if (typeof image === 'string' && image.startsWith('data:image')) {
+        this._view.showPhotoResult(image);
+        this.photoBlob = await this.convertBase64ToBlob(image, 'image/png');
+      }
+
+      else {
+        throw new Error('Format gambar tidak dikenali dari kamera');
+      }
+
+      return;
+    } catch (error) {
+      console.error('Error taking photo with Camera class:', error);
+      alert('Gagal mengambil foto: ' + error.message);
+      return;
     }
-
-    const context = this._canvas.getContext('2d');
-    this._canvas.width = this._video.videoWidth;
-    this._canvas.height = this._video.videoHeight;
-    context.drawImage(this._video, 0, 0, this._canvas.width, this._canvas.height);
-    const imageData = this._canvas.toDataURL('image/jpeg');
-    this._view.showPhotoResult(imageData);
-
-    this.photoBlob = await this.convertBase64ToBlob(imageData, 'image/jpeg');
   }
+
+  const context = this._canvas.getContext('2d');
+  this._canvas.width = this._video.videoWidth;
+  this._canvas.height = this._video.videoHeight;
+  context.drawImage(this._video, 0, 0, this._canvas.width, this._canvas.height);
+
+  const imageData = this._canvas.toDataURL('image/jpeg');
+  this._view.showPhotoResult(imageData);
+  this.photoBlob = await this.convertBase64ToBlob(imageData, 'image/jpeg');
+}
+
+async blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 
   handleFileInput(event) {
     const file = event.target.files[0];
